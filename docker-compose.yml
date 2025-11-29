@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    environment:
+      - DATA_FILE=/data/data.json
+      - ADMIN_SECRET=${ADMIN_SECRET:-santaadmin}
+    volumes:
+      - app_data:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.secret-santa.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.secret-santa.entrypoints=websecure"
+      - "traefik.http.routers.secret-santa.tls=true"
+      - "traefik.http.routers.secret-santa.tls.certresolver=le"
+      - "traefik.http.services.secret-santa.loadbalancer.server.port=8000"
+      - "traefik.http.routers.secret-santa-http.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.secret-santa-http.entrypoints=web"
+      - "traefik.http.routers.secret-santa-http.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+  traefik:
+    image: traefik:v2.10
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.le.acme.httpchallenge=true"
+      - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.le.acme.email=${LE_EMAIL}"
+      - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "traefik_letsencrypt:/letsencrypt"
+
+volumes:
+  app_data:
+  traefik_letsencrypt:

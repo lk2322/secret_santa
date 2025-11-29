@@ -34,6 +34,26 @@ docker run -it --rm -p 8000:8000 \
   secret-santa
 ```
 
+### Docker Compose (Traefik + HTTPS)
+
+Prereqs:
+- Откройте 80/443 на сервере и укажите реальный домен.
+- Создайте файл `.env` рядом с `docker-compose.yml`, например:
+```
+DOMAIN=example.com
+LE_EMAIL=you@example.com
+ADMIN_SECRET=santaadmin
+```
+
+Запуск (Traefik запросит сертификат у Let's Encrypt):
+```bash
+docker compose --env-file .env up -d
+```
+
+Сервисы:
+- `app` — FastAPI + фронтенд, хранит данные в томе `app_data` (`DATA_FILE=/data/data.json`).
+- `traefik` — балансировщик и TLS (HTTP→HTTPS редирект, сертификаты в томе `traefik_letsencrypt`).
+
 ## Environment
 
 Optional env var:
