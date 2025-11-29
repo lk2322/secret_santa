@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Тайный Санта</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --card: #111827;
+        --accent: #f97316;
+        --accent-2: #22c55e;
+        --text: #e5e7eb;
+        --muted: #94a3b8;
+        --stroke: rgba(255, 255, 255, 0.08);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Helvetica Neue", "Segoe UI", sans-serif;
+        background: radial-gradient(circle at 20% 20%, #1f2937 0, #0f172a 35%),
+          radial-gradient(circle at 80% 0%, #111827 0, #0f172a 45%), var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 32px 16px 48px;
+      }
+      .app {
+        width: min(100%, 960px);
+        background: var(--card);
+        border: 1px solid var(--stroke);
+        border-radius: 18px;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+        padding: 28px;
+      }
+      h1 {
+        margin: 0 0 6px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      p.lead {
+        margin: 0 0 24px;
+        color: var(--muted);
+      }
+      section {
+        border: 1px solid var(--stroke);
+        border-radius: 14px;
+        padding: 18px;
+        margin-bottom: 18px;
+        background: rgba(255, 255, 255, 0.01);
+      }
+      section h2 {
+        margin: 0 0 8px;
+        font-size: 20px;
+      }
+      label {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      input,
+      textarea {
+        width: 100%;
+        padding: 12px;
+        background: #0b1220;
+        border: 1px solid var(--stroke);
+        border-radius: 10px;
+        color: var(--text);
+        font-size: 15px;
+      }
+      textarea {
+        min-height: 90px;
+        resize: vertical;
+      }
+      button {
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 15px;
+        cursor: pointer;
+        transition: transform 0.08s ease, box-shadow 0.12s ease;
+      }
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 30px rgba(249, 115, 22, 0.25);
+      }
+      button.secondary {
+        background: transparent;
+        border: 1px solid var(--stroke);
+        color: var(--text);
+      }
+      .row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 12px;
+      }
+      .divider {
+        border-top: 1px solid var(--stroke);
+        margin: 14px 0;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--stroke);
+        padding: 8px 12px;
+        border-radius: 999px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .status {
+        margin-top: 12px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: rgba(34, 197, 94, 0.08);
+        border: 1px solid rgba(34, 197, 94, 0.2);
+        color: #a7f3d0;
+        font-size: 14px;
+      }
+      .status.error {
+        background: rgba(239, 68, 68, 0.08);
+        border-color: rgba(239, 68, 68, 0.35);
+        color: #fecaca;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 10px 8px;
+        border-bottom: 1px solid var(--stroke);
+      }
+      .assignment-card {
+        border: 1px solid var(--stroke);
+        border-radius: 12px;
+        padding: 14px;
+        background: rgba(249, 115, 22, 0.05);
+      }
+      .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 8px;
+        background: rgba(34, 197, 94, 0.14);
+        color: #bbf7d0;
+        font-size: 12px;
+        margin-top: 6px;
+      }
+      a {
+        color: #fde68a;
+      }
+      @media (max-width: 640px) {
+        body {
+          padding: 12px;
+        }
+        .app {
+          padding: 18px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <h1>Тайный Санта</h1>
+      <p class="lead">
+        Поделитесь ссылкой с друзьями, соберите их пожелания и проведите
+        распределение, когда все готовы. Каждый получит личную ссылку и увидит
+        только своего получателя.
+      </p>
+
+      <section id="join-section">
+        <div class="row">
+          <div>
+            <h2>Присоединиться к обмену</h2>
+            <p class="pill">Быстрое участие — результат увидит только ваш получатель.</p>
+          </div>
+          <div style="text-align: right; align-self: center">
+            <button class="secondary" id="organizer-view-btn">
+              Я организатор
+            </button>
+          </div>
+        </div>
+        <form id="join-form">
+          <label for="name">Ваше имя *</label>
+          <input
+            id="name"
+            name="name"
+            required
+            placeholder="Аня, Алиса, Сергей..."
+          />
+
+          <label for="giftPreference">Пожелания к подарку (по желанию)</label>
+          <textarea
+            id="giftPreference"
+            name="giftPreference"
+            placeholder="Любимые сладости, уютные носки, любимые авторы..."
+          ></textarea>
+
+          <div style="margin-top: 12px">
+            <button type="submit">Участвовать</button>
+          </div>
+        </form>
+        <div id="join-status" class="status" style="display: none"></div>
+      </section>
+
+      <section id="assignment-section" style="display: none">
+        <h2>Ваш получатель</h2>
+        <p class="pill" id="assignment-hint">
+          Используйте личную ссылку, которую получили при регистрации.
+        </p>
+        <div id="assignment-card" class="assignment-card" style="display: none">
+          <div id="receiver-name" style="font-size: 20px; font-weight: 700"></div>
+          <div class="badge">Вы дарите</div>
+          <div id="receiver-pref" style="margin-top: 10px; color: var(--muted)"></div>
+        </div>
+        <div id="assignment-status" class="status" style="display: none"></div>
+      </section>
+
+      <section id="organizer-section" style="display: none">
+        <h2>Панель организатора</h2>
+        <p class="pill">
+          Доступ защищен секретом. По умолчанию — <strong>santaadmin</strong>.
+        </p>
+        <div class="row">
+          <div>
+            <label for="admin-secret">Секрет организатора</label>
+            <input
+              id="admin-secret"
+              placeholder="santaadmin"
+              autocomplete="off"
+            />
+          </div>
+          <div style="align-self: end; text-align: right">
+            <button id="refresh-participants">Обновить список</button>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="row" style="align-items: center">
+          <div>
+            <p style="margin: 0; color: var(--muted)">
+              Нажмите распределение, когда все присоединились — никто не получит
+              самого себя.
+            </p>
+          </div>
+          <div style="text-align: right">
+            <button id="shuffle-btn" style="background: var(--accent-2)">
+              Провести распределение
+            </button>
+          </div>
+        </div>
+        <div id="organizer-status" class="status" style="display: none"></div>
+        <div id="participants-table" style="margin-top: 14px"></div>
+      </section>
+    </div>
+
+    <script>
+      const joinSection = document.getElementById("join-section");
+      const assignmentSection = document.getElementById("assignment-section");
+      const organizerSection = document.getElementById("organizer-section");
+      const joinForm = document.getElementById("join-form");
+      const joinStatus = document.getElementById("join-status");
+      const assignmentStatus = document.getElementById("assignment-status");
+      const organizerStatus = document.getElementById("organizer-status");
+      const assignmentCard = document.getElementById("assignment-card");
+      const receiverName = document.getElementById("receiver-name");
+      const receiverPref = document.getElementById("receiver-pref");
+      const assignmentHint = document.getElementById("assignment-hint");
+      const organizerBtn = document.getElementById("organizer-view-btn");
+      const refreshParticipantsBtn = document.getElementById("refresh-participants");
+      const shuffleBtn = document.getElementById("shuffle-btn");
+      const participantsTable = document.getElementById("participants-table");
+      const adminSecretInput = document.getElementById("admin-secret");
+
+      const apiBase = window.location.origin;
+      const url = new URL(window.location.href);
+      const pathParts = window.location.pathname.split("/").filter(Boolean);
+      const defaultSecret = "santaadmin";
+
+      adminSecretInput.value = url.searchParams.get("secret") || defaultSecret;
+
+      organizerBtn.addEventListener("click", () => {
+        window.location.search = "?admin=1";
+      });
+
+      if (url.searchParams.get("admin") === "1") {
+        organizerSection.style.display = "block";
+        joinSection.style.display = "none";
+      }
+
+      const isAssignmentPage =
+        pathParts[0] === "my-assignment" && pathParts[1] !== undefined;
+      if (isAssignmentPage) {
+        const participantId = pathParts[1];
+        joinSection.style.display = "none";
+        assignmentSection.style.display = "block";
+        fetchAssignment(participantId);
+      }
+
+      joinForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        joinStatus.style.display = "none";
+
+        const formData = new FormData(joinForm);
+        const payload = {
+          name: formData.get("name"),
+          giftPreference: formData.get("giftPreference"),
+        };
+
+        try {
+          const res = await fetch(`${apiBase}/participants`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.detail || "Не удалось присоединиться.");
+          const link = `${window.location.origin}${data.assignmentLink}`;
+          joinStatus.innerHTML = `Вы в игре! Сохраните личную ссылку: <a href="${link}">${link}</a>`;
+          joinStatus.classList.remove("error");
+          joinStatus.style.display = "block";
+          joinForm.reset();
+        } catch (err) {
+          joinStatus.textContent = err.message;
+          joinStatus.classList.add("error");
+          joinStatus.style.display = "block";
+        }
+      });
+
+      async function fetchAssignment(participantId) {
+        assignmentStatus.style.display = "none";
+        assignmentCard.style.display = "none";
+        assignmentHint.style.display = "none";
+        try {
+          const res = await fetch(`${apiBase}/assignment/${participantId}`);
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.detail || "Не удалось загрузить получателя.");
+          const receiver = data.youAreGivingTo;
+          receiverName.textContent = receiver.name;
+          receiverPref.textContent =
+            receiver.giftPreference || "Пожелания не указаны.";
+          assignmentCard.style.display = "block";
+        } catch (err) {
+          assignmentStatus.textContent = err.message;
+          assignmentStatus.classList.add("error");
+          assignmentStatus.style.display = "block";
+          assignmentHint.style.display = "block";
+        }
+      }
+
+      async function loadParticipants() {
+        organizerStatus.style.display = "none";
+        participantsTable.innerHTML = "";
+        try {
+          const secret = adminSecretInput.value;
+          const res = await fetch(
+            `${apiBase}/participants?secret=${encodeURIComponent(secret)}`
+          );
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.detail || "Не удалось загрузить список.");
+          if (!data.length) {
+            participantsTable.innerHTML =
+              '<p style="color: var(--muted)">Пока никто не присоединился.</p>';
+            return;
+          }
+          const rows = data
+            .map(
+              (p) => `
+              <tr>
+                <td>${p.name}</td>
+                <td>${p.giftPreference || "—"}</td>
+                <td>${p.assignedTo ? "Назначен" : "Ожидает"}</td>
+              </tr>`
+            )
+            .join("");
+          participantsTable.innerHTML = `
+            <table>
+              <thead>
+                <tr><th>Имя</th><th>Пожелания</th><th>Статус</th></tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          `;
+        } catch (err) {
+          organizerStatus.textContent = err.message;
+          organizerStatus.classList.add("error");
+          organizerStatus.style.display = "block";
+        }
+      }
+
+      async function shuffleParticipants() {
+        organizerStatus.style.display = "none";
+        try {
+          const secret = adminSecretInput.value;
+          const res = await fetch(
+            `${apiBase}/shuffle?secret=${encodeURIComponent(secret)}`,
+            { method: "POST" }
+          );
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.detail || "Не удалось провести распределение.");
+          organizerStatus.textContent = "Распределение готово и сохранено.";
+          organizerStatus.classList.remove("error");
+          organizerStatus.style.display = "block";
+          if (data.assignments?.length) {
+            const rows = data.assignments
+              .map(
+                (pair) =>
+                  `<tr><td>${pair.giver}</td><td>${pair.receiver}</td></tr>`
+              )
+              .join("");
+            participantsTable.innerHTML = `
+              <table>
+                <thead><tr><th>Дарит</th><th>Получает</th></tr></thead>
+                <tbody>${rows}</tbody>
+              </table>
+            `;
+          }
+        } catch (err) {
+          organizerStatus.textContent = err.message;
+          organizerStatus.classList.add("error");
+          organizerStatus.style.display = "block";
+        }
+      }
+
+      refreshParticipantsBtn.addEventListener("click", loadParticipants);
+      shuffleBtn.addEventListener("click", shuffleParticipants);
+    </script>
+  </body>
+</html>

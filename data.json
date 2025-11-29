@@ -1,0 +1,17 @@
+{
+  "participants": [
+    {
+      "id": "cc9dd422-97f1-49fd-8957-42d3c73d90ad",
+      "name": "dsd",
+      "giftPreference": "sdsd",
+      "assignedTo": "8e69a6c8-9ca2-45c2-8371-9960bee93114"
+    },
+    {
+      "id": "8e69a6c8-9ca2-45c2-8371-9960bee93114",
+      "name": "fsdjmfs",
+      "giftPreference": "sdnmfsd",
+      "assignedTo": "cc9dd422-97f1-49fd-8957-42d3c73d90ad"
+    }
+  ],
+  "shuffled": true
+}
