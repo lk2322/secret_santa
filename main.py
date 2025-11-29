@@ -143,6 +143,21 @@ def list_participants(secret: Optional[str] = Query(None)):
     return list(participants.values())
 
 
+@app.delete("/participants/{participant_id}")
+def remove_participant(participant_id: str, secret: Optional[str] = Query(None)):
+    require_admin(secret)
+    if shuffled:
+        raise HTTPException(
+            status_code=400,
+            detail="Нельзя удалять участников после распределения.",
+        )
+    if participant_id not in participants:
+        raise HTTPException(status_code=404, detail="Участник не найден.")
+    participants.pop(participant_id)
+    save_data()
+    return {"message": "Участник удален."}
+
+
 @app.post("/shuffle")
 def shuffle(secret: Optional[str] = Query(None)):
     require_admin(secret)

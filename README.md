@@ -64,6 +64,7 @@ Optional env var:
 
 - `POST /participants` – Body: `{"name": "Jane", "giftPreference": "Books"}`. Adds a participant and returns their id plus a personal link.
 - `GET /participants?secret=...` – Organizer-only list of all participants.
+- `DELETE /participants/{participant_id}?secret=...` – Organizer-only removal (доступно до распределения).
 - `POST /shuffle?secret=...` – Organizer-only. Shuffles assignments (no self-pairings) and prevents re-shuffling.
 - `GET /assignment/{participant_id}` – Returns the single assignment for that participant once shuffled.
 

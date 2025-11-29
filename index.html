@@ -96,6 +96,10 @@
         border: 1px solid var(--stroke);
         color: var(--text);
       }
+      .table-action {
+        padding: 6px 10px;
+        font-size: 13px;
+      }
       .row {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -249,7 +253,7 @@
           <div>
             <p style="margin: 0; color: var(--muted)">
               Нажмите распределение, когда все присоединились — никто не получит
-              самого себя.
+              самого себя. Пожелания участников скрыты и видны только их дарителю.
             </p>
           </div>
           <div style="text-align: right">
@@ -373,23 +377,54 @@
             return;
           }
           const rows = data
-            .map(
-              (p) => `
+            .map((p) => {
+              const actionCell = p.assignedTo
+                ? "—"
+                : `<button class=\"secondary table-action\" data-id=\"${p.id}\">Удалить</button>`;
+              return `
               <tr>
                 <td>${p.name}</td>
-                <td>${p.giftPreference || "—"}</td>
                 <td>${p.assignedTo ? "Назначен" : "Ожидает"}</td>
-              </tr>`
-            )
+                <td>${actionCell}</td>
+              </tr>`;
+            })
             .join("");
           participantsTable.innerHTML = `
             <table>
               <thead>
-                <tr><th>Имя</th><th>Пожелания</th><th>Статус</th></tr>
+                <tr><th>Имя</th><th>Статус</th><th>Действие</th></tr>
               </thead>
               <tbody>${rows}</tbody>
             </table>
           `;
+        } catch (err) {
+          organizerStatus.textContent = err.message;
+          organizerStatus.classList.add("error");
+          organizerStatus.style.display = "block";
+        }
+      }
+
+      participantsTable.addEventListener("click", async (e) => {
+        const target = e.target;
+        if (target.tagName === "BUTTON" && target.dataset.id) {
+          await deleteParticipant(target.dataset.id);
+        }
+      });
+
+      async function deleteParticipant(id) {
+        organizerStatus.style.display = "none";
+        try {
+          const secret = adminSecretInput.value;
+          const res = await fetch(
+            `${apiBase}/participants/${id}?secret=${encodeURIComponent(secret)}`,
+            { method: "DELETE" }
+          );
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.detail || "Не удалось удалить участника.");
+          organizerStatus.textContent = "Участник удален.";
+          organizerStatus.classList.remove("error");
+          organizerStatus.style.display = "block";
+          await loadParticipants();
         } catch (err) {
           organizerStatus.textContent = err.message;
           organizerStatus.classList.add("error");
