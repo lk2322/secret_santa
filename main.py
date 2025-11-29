@@ -16,6 +16,10 @@ class ParticipantIn(BaseModel):
     giftPreference: Optional[str] = None
 
 
+class ParticipantPreferenceUpdate(BaseModel):
+    giftPreference: Optional[str] = None
+
+
 class Participant(BaseModel):
     id: str
     name: str
@@ -141,6 +145,23 @@ def add_participant(participant_in: ParticipantIn):
 def list_participants(secret: Optional[str] = Query(None)):
     require_admin(secret)
     return list(participants.values())
+
+
+@app.patch("/participants/{participant_id}")
+def update_preference(
+    participant_id: str,
+    payload: ParticipantPreferenceUpdate,
+    secret: Optional[str] = Query(None),
+):
+    require_admin(secret)
+    participant = participants.get(participant_id)
+    if not participant:
+        raise HTTPException(status_code=404, detail="Участник не найден.")
+    participant.giftPreference = (
+        payload.giftPreference.strip() if payload.giftPreference else None
+    )
+    save_data()
+    return {"message": "Пожелание обновлено."}
 
 
 @app.delete("/participants/{participant_id}")

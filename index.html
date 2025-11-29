@@ -99,6 +99,7 @@
       .table-action {
         padding: 6px 10px;
         font-size: 13px;
+        margin-right: 6px;
       }
       .row {
         display: grid;
@@ -284,6 +285,7 @@
       const shuffleBtn = document.getElementById("shuffle-btn");
       const participantsTable = document.getElementById("participants-table");
       const adminSecretInput = document.getElementById("admin-secret");
+      let participantsCache = [];
 
       const apiBase = window.location.origin;
       const url = new URL(window.location.href);
@@ -371,6 +373,7 @@
           );
           const data = await res.json();
           if (!res.ok) throw new Error(data.detail || "Не удалось загрузить список.");
+          participantsCache = data;
           if (!data.length) {
             participantsTable.innerHTML =
               '<p style="color: var(--muted)">Пока никто не присоединился.</p>';
@@ -378,9 +381,11 @@
           }
           const rows = data
             .map((p) => {
-              const actionCell = p.assignedTo
-                ? "—"
-                : `<button class=\"secondary table-action\" data-id=\"${p.id}\">Удалить</button>`;
+              const editBtn = `<button class="secondary table-action" data-action="edit" data-id="${p.id}">Изменить пожелание</button>`;
+              const deleteBtn = p.assignedTo
+                ? ""
+                : `<button class="secondary table-action" data-action="delete" data-id="${p.id}">Удалить</button>`;
+              const actionCell = `${editBtn}${deleteBtn}`;
               return `
               <tr>
                 <td>${p.name}</td>
@@ -407,9 +412,47 @@
       participantsTable.addEventListener("click", async (e) => {
         const target = e.target;
         if (target.tagName === "BUTTON" && target.dataset.id) {
-          await deleteParticipant(target.dataset.id);
+          const action = target.dataset.action;
+          if (action === "delete") {
+            await deleteParticipant(target.dataset.id);
+          }
+          if (action === "edit") {
+            await editPreference(target.dataset.id);
+          }
         }
       });
+
+      async function editPreference(id) {
+        const participant = participantsCache.find((p) => p.id === id);
+        const current = participant?.giftPreference || "";
+        const next = prompt(
+          "Новое пожелание (оставьте пустым, чтобы очистить):",
+          current
+        );
+        if (next === null) return;
+        organizerStatus.style.display = "none";
+        try {
+          const secret = adminSecretInput.value;
+          const res = await fetch(
+            `${apiBase}/participants/${id}?secret=${encodeURIComponent(secret)}`,
+            {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ giftPreference: next }),
+            }
+          );
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.detail || "Не удалось обновить пожелание.");
+          organizerStatus.textContent = "Пожелание обновлено.";
+          organizerStatus.classList.remove("error");
+          organizerStatus.style.display = "block";
+          await loadParticipants();
+        } catch (err) {
+          organizerStatus.textContent = err.message;
+          organizerStatus.classList.add("error");
+          organizerStatus.style.display = "block";
+        }
+      }
 
       async function deleteParticipant(id) {
         organizerStatus.style.display = "none";
