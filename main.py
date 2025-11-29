@@ -164,6 +164,26 @@ def update_preference(
     return {"message": "Пожелание обновлено."}
 
 
+@app.get("/participants/{participant_id}/preference")
+def get_self_preference(participant_id: str):
+    participant = participants.get(participant_id)
+    if not participant:
+        raise HTTPException(status_code=404, detail="Участник не найден.")
+    return {"giftPreference": participant.giftPreference}
+
+
+@app.patch("/participants/{participant_id}/preference")
+def update_self_preference(participant_id: str, payload: ParticipantPreferenceUpdate):
+    participant = participants.get(participant_id)
+    if not participant:
+        raise HTTPException(status_code=404, detail="Участник не найден.")
+    participant.giftPreference = (
+        payload.giftPreference.strip() if payload.giftPreference else None
+    )
+    save_data()
+    return {"message": "Пожелание обновлено."}
+
+
 @app.delete("/participants/{participant_id}")
 def remove_participant(participant_id: str, secret: Optional[str] = Query(None)):
     require_admin(secret)

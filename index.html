@@ -57,6 +57,9 @@
         margin: 0 0 8px;
         font-size: 20px;
       }
+      h3 {
+        margin: 12px 0 8px;
+      }
       label {
         display: block;
         margin-bottom: 6px;
@@ -229,6 +232,19 @@
           <div id="receiver-pref" style="margin-top: 10px; color: var(--muted)"></div>
         </div>
         <div id="assignment-status" class="status" style="display: none"></div>
+        <div>
+          <h3 style="margin-top: 16px">Ваши пожелания</h3>
+          <p class="pill">Можете изменить или очистить пожелание в любое время.</p>
+          <textarea
+            id="self-pref"
+            placeholder="Например: люблю кофе, обожаю настолки..."
+            style="margin-top: 8px"
+          ></textarea>
+          <div style="margin-top: 10px">
+            <button id="save-pref-btn" class="secondary">Сохранить пожелание</button>
+          </div>
+          <div id="pref-status" class="status" style="display: none"></div>
+        </div>
       </section>
 
       <section id="organizer-section" style="display: none">
@@ -280,6 +296,9 @@
       const receiverName = document.getElementById("receiver-name");
       const receiverPref = document.getElementById("receiver-pref");
       const assignmentHint = document.getElementById("assignment-hint");
+      const selfPrefInput = document.getElementById("self-pref");
+      const savePrefBtn = document.getElementById("save-pref-btn");
+      const prefStatus = document.getElementById("pref-status");
       const organizerBtn = document.getElementById("organizer-view-btn");
       const refreshParticipantsBtn = document.getElementById("refresh-participants");
       const shuffleBtn = document.getElementById("shuffle-btn");
@@ -291,6 +310,7 @@
       const url = new URL(window.location.href);
       const pathParts = window.location.pathname.split("/").filter(Boolean);
       const defaultSecret = "santaadmin";
+      let currentParticipantId = null;
 
       adminSecretInput.value = url.searchParams.get("secret") || defaultSecret;
 
@@ -307,10 +327,16 @@
         pathParts[0] === "my-assignment" && pathParts[1] !== undefined;
       if (isAssignmentPage) {
         const participantId = pathParts[1];
+        currentParticipantId = participantId;
         joinSection.style.display = "none";
         assignmentSection.style.display = "block";
         fetchAssignment(participantId);
+        loadOwnPreference(participantId);
       }
+      savePrefBtn?.addEventListener("click", async () => {
+        if (!currentParticipantId) return;
+        await saveOwnPreference(currentParticipantId);
+      });
 
       joinForm.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -360,6 +386,40 @@
           assignmentStatus.classList.add("error");
           assignmentStatus.style.display = "block";
           assignmentHint.style.display = "block";
+        }
+      }
+
+      async function loadOwnPreference(participantId) {
+        prefStatus.style.display = "none";
+        try {
+          const res = await fetch(`${apiBase}/participants/${participantId}/preference`);
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.detail || "Не удалось загрузить пожелание.");
+          selfPrefInput.value = data.giftPreference || "";
+        } catch (err) {
+          prefStatus.textContent = err.message;
+          prefStatus.classList.add("error");
+          prefStatus.style.display = "block";
+        }
+      }
+
+      async function saveOwnPreference(participantId) {
+        prefStatus.style.display = "none";
+        try {
+          const res = await fetch(`${apiBase}/participants/${participantId}/preference`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ giftPreference: selfPrefInput.value }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.detail || "Не удалось обновить пожелание.");
+          prefStatus.textContent = "Сохранено.";
+          prefStatus.classList.remove("error");
+          prefStatus.style.display = "block";
+        } catch (err) {
+          prefStatus.textContent = err.message;
+          prefStatus.classList.add("error");
+          prefStatus.style.display = "block";
         }
       }
 

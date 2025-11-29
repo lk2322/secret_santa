@@ -63,6 +63,8 @@ Optional env var:
 ## API (FastAPI)
 
 - `POST /participants` – Body: `{"name": "Jane", "giftPreference": "Books"}`. Adds a participant and returns their id plus a personal link.
+- `GET /participants/{participant_id}/preference` – Self-service fetch of the participant's own gift preference by their personal link.
+- `PATCH /participants/{participant_id}/preference` – Self-service update of the participant's gift preference by their personal link.
 - `GET /participants?secret=...` – Organizer-only list of all participants.
 - `PATCH /participants/{participant_id}?secret=...` – Organizer-only update of gift preference (можно очищать поле).
 - `DELETE /participants/{participant_id}?secret=...` – Organizer-only removal (доступно до распределения).
